@@ -17,6 +17,6 @@ public class HelloController {
 
         log.info("Request hit instance: {}", instanceId);
 
-        return "hello word update version 1.0.1 - instance: " + instanceId;
+        return "hello word update version 1.0.2 - instance: " + instanceId;
     }
 }
