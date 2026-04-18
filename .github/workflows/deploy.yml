@@ -31,6 +31,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
+          port: 26266   #  VPS của bạn
           script: |
             docker stop app || true
             docker rm app || true
