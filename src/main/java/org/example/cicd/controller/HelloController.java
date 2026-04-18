@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @GetMapping({"/", "/hello"})
     public String hello() {
-        return "hello word update";
+        return "hello word update version 1.0.1";
     }
 }
