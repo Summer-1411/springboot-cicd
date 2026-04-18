@@ -1,4 +1,4 @@
-name: CI/CD Docker Spring Boot  #Hiển thị tên workflow ở tab Action trên github
+name: CI/CD with GitHub Actions  #Hiển thị tên workflow ở tab Action trên github
 
 on:
   push:
@@ -29,6 +29,8 @@ jobs:
         with:
           path: ~/.m2
           key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-
 
       # =========================
       # 3. GENERATE IMAGE TAG
@@ -67,13 +69,27 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/springboot-cicd:${{ env.IMAGE_TAG }}
             ${{ secrets.DOCKER_USERNAME }}/springboot-cicd:latest
 
+
       # =========================
-      # 6. DEPLOY TO VPS
+      # 6. DEPLOY TO VPS (CÁCH 2 - NO GIT PULL)
       # =========================
+      - name: Copy docker-compose + nginx to VPS
+        # WHAT: copy file config từ repo sang VPS
+        # WHY: VPS không còn git repo, chỉ nhận config
+        # HOW: SCP từ GitHub runner → VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          port: 26266
+          source: "docker-compose.yml,nginx/nginx.conf"
+          target: "/root/app"
+
       - name: Deploy to VPS
-        # WHAT: SSH vào VPS để pull & run container
-        # WHY: tách CI (build) và CD (deploy)
-        # HOW: dùng SSH action + docker CLI
+        # WHAT: SSH vào VPS để pull image + run container
+        # WHY: tách build (GitHub) và run (VPS)
+        # HOW: docker compose dùng image từ Docker Hub
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -81,24 +97,17 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: 26266
           script: |
+            cd /root/app
 
-            docker ps -q --filter "label=project=springboot-cicd" | xargs -r docker stop
-            docker ps -q --filter "label=project=springboot-cicd" | xargs -r docker rm
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
 
-            docker pull ${{ secrets.DOCKER_USERNAME }}/springboot-cicd:${{ env.IMAGE_TAG }}
+            docker compose pull
 
-            docker run -d \
-              -p 8080:8080 \
-              --name springboot-cicd-app \
-              --label project=springboot-cicd \
-              ${{ secrets.DOCKER_USERNAME }}/springboot-cicd:${{ env.IMAGE_TAG }}
+            docker compose up -d
+            docker image prune -f
 
-
-            docker images ${{ secrets.DOCKER_USERNAME }}/springboot-cicd \
-              --format "{{.ID}}" \
-              | tail -n +3 \
-              | xargs -r docker rmi
-
+#Cách ban đầu
 
 #name: CI/CD Docker Spring Boot #Hiển thị tên workflow ở tab Action trên github
 #
