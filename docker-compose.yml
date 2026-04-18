@@ -25,7 +25,7 @@ services:
     restart: always
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - INSTANCE_ID=app1
+      - INSTANCE_ID=app3
 
   nginx:
     image: nginx:latest
