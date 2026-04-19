@@ -11,12 +11,7 @@ scrape_configs:
   - job_name: docker
 
     pipeline_stages:
-      # parse log docker (QUAN TRỌNG)
       - docker: {}
-
-      # extract container name
-      - regex:
-          expression: '.*container_name=(?P<container>[^ ]+).*'
 
     static_configs:
       - targets:
@@ -25,8 +20,12 @@ scrape_configs:
           job: docker
           __path__: /var/lib/docker/containers/*/*.log
 
-    # 🔥 FILTER CHỈ LẤY APP
+    # 🔥 GẮN LABEL CONTAINER
     relabel_configs:
-      - source_labels: ['__path__']
-        regex: '.*(app1|app2|app3).*'
+      - source_labels: ['__meta_docker_container_name']
+        target_label: 'container'
+
+      # 🔥 CHỈ GIỮ app1, app2, app3
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(app1|app2|app3)'
         action: keep
