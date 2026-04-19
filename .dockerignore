@@ -1,0 +1,20 @@
+# Maven
+target/
+*.log
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Env
+.env
