@@ -2,35 +2,35 @@ version: "3.8"
 
 services:
   # =========================
-  # SPRING BOOT INSTANCES
+  # 🔥 APP INSTANCES
   # =========================
   app1:
     image: ${DOCKER_USERNAME}/springboot-cicd:${IMAGE_TAG}
     container_name: app1
     environment:
-      INSTANCE_ID: app1
+      - INSTANCE_ID=app1
     restart: always
 
   app2:
     image: ${DOCKER_USERNAME}/springboot-cicd:${IMAGE_TAG}
     container_name: app2
     environment:
-      INSTANCE_ID: app2
+      - INSTANCE_ID=app2
     restart: always
 
   app3:
     image: ${DOCKER_USERNAME}/springboot-cicd:${IMAGE_TAG}
     container_name: app3
     environment:
-      INSTANCE_ID: app3
+      - INSTANCE_ID=app3
     restart: always
 
   # =========================
-  # NGINX LOAD BALANCER
+  # 🌐 NGINX LOAD BALANCER
   # =========================
   nginx:
     image: nginx:latest
-    container_name: nginx-lb
+    container_name: nginx
     ports:
       - "80:80"
     volumes:
@@ -39,41 +39,50 @@ services:
       - app1
       - app2
       - app3
-    restart: always
 
   # =========================
-  # LOKI (LOG STORAGE)
+  # 📊 LOKI (LOG STORAGE)
   # =========================
   loki:
     image: grafana/loki:2.9.3
     container_name: loki
     ports:
       - "3100:3100"
+    volumes:
+      - loki_data:/loki
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
     command: -config.file=/etc/loki/local-config.yaml
-    restart: always
 
   # =========================
-  # PROMTAIL (LOG COLLECTOR)
+  # 📥 PROMTAIL (LOG COLLECTOR)
   # =========================
   promtail:
     image: grafana/promtail:2.9.3
     container_name: promtail
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./promtail/promtail-config.yml:/etc/promtail/promtail.yml
-    command: -config.file=/etc/promtail/promtail.yml
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
-    restart: always
 
   # =========================
-  # GRAFANA (UI)
+  # 📊 GRAFANA (UI)
   # =========================
   grafana:
-    image: grafana/grafana:10.2.3
+    image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
     depends_on:
       - loki
-    restart: always
+
+# =========================
+# 💾 VOLUMES (GIỮ DATA)
+# =========================
+volumes:
+  loki_data:
+  grafana_data:
