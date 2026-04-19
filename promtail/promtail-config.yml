@@ -19,13 +19,3 @@ scrape_configs:
         labels:
           job: docker
           __path__: /var/lib/docker/containers/*/*.log
-
-    # 🔥 GẮN LABEL CONTAINER
-    relabel_configs:
-      - source_labels: ['__meta_docker_container_name']
-        target_label: 'container'
-
-      # 🔥 CHỈ GIỮ app1, app2, app3
-      - source_labels: ['__meta_docker_container_name']
-        regex: '/(app1|app2|app3)'
-        action: keep
