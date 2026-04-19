@@ -83,7 +83,11 @@ jobs:
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
           port: 26266
-          source: "docker-compose.yml,nginx/nginx.conf,promtail/promtail-config.yml"
+          source: |
+            docker-compose.yml
+            nginx/nginx.conf
+            loki/loki-config.yml
+            promtail/promtail-config.yml
           target: "/root/app"
 
       - name: Deploy to VPS
