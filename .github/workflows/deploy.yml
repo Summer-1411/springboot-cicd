@@ -83,11 +83,7 @@ jobs:
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
           port: 26266
-          source: |
-            docker-compose.yml
-            nginx/nginx.conf
-            loki/loki-config.yml
-            promtail/promtail-config.yml
+          source: "docker-compose.yml,nginx/nginx.conf"
           target: "/root/app"
 
       - name: Deploy to VPS
@@ -106,12 +102,10 @@ jobs:
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             export IMAGE_TAG=${{ env.IMAGE_TAG }}
 
-            docker compose down
             docker compose pull
-            docker compose up -d --force-recreate
 
+            docker compose up -d
             docker image prune -f
-
 
 #Cách ban đầu
 
